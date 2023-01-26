@@ -29,7 +29,7 @@ class ReversalResponse {
     return response.result == Result.success;
   }
 
-  /// Did this transaction refunded before
+  /// Was this transaction refunded before
   bool get isAlreadyVoided {
     if (response.result == Result.success) {
       return response.additionalResponse?.contains('voided') ?? false;
