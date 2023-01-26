@@ -1,0 +1,1 @@
+const String currentProtocolVersion = '3.0';
