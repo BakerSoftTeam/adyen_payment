@@ -73,7 +73,7 @@ class AdyenTerminalService {
 // Create default dio for service
 Dio _createDefaultDio(PointOfSaleConfig config) {
   final dio = Dio();
-  dio.options = _buildBaseOptions('https://terminal-api-test.adyen.com/sync');
+  dio.options = _buildBaseOptions(config.endpoint.url);
   dio.interceptors.add(_ApiKeyInterceptor(config));
   return dio;
 }
