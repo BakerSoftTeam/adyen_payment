@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:adyen_payment/src/factory/request_factory.dart';
 import 'package:adyen_payment/src/model/config.dart';
 import 'package:adyen_payment/src/model/payment/poi_data.dart';
@@ -85,6 +87,7 @@ BaseOptions _buildBaseOptions(String baseUrl) {
     connectTimeout: Duration(milliseconds: timeout.inMilliseconds),
     sendTimeout: Duration(milliseconds: timeout.inMilliseconds),
     receiveTimeout: Duration(milliseconds: timeout.inMilliseconds),
+    contentType: ContentType.json.toString(),
   );
 }
 
