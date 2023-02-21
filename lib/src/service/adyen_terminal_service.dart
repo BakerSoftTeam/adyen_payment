@@ -54,7 +54,7 @@ class AdyenTerminalService {
   Future<ReferencedRefundResponse> refundByReference({
     required POIData transaction,
     ReversalReason reason = ReversalReason.merchantCancel,
-}) async {
+  }) async {
     final request = requestFactory.createReferencedRefundRequest(
       transaction: transaction,
       reason: reason,
@@ -82,9 +82,9 @@ BaseOptions _buildBaseOptions(String baseUrl) {
   const Duration timeout = Duration(seconds: 150);
   return BaseOptions(
     baseUrl: baseUrl,
-    connectTimeout: timeout.inMilliseconds,
-    sendTimeout: timeout.inMilliseconds,
-    receiveTimeout: timeout.inMilliseconds,
+    connectTimeout: Duration(milliseconds: timeout.inMilliseconds),
+    sendTimeout: Duration(milliseconds: timeout.inMilliseconds),
+    receiveTimeout: Duration(milliseconds: timeout.inMilliseconds),
   );
 }
 
