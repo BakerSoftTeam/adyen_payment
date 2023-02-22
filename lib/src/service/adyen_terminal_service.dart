@@ -81,7 +81,7 @@ Dio _createDefaultDio(PointOfSaleConfig config) {
 }
 
 BaseOptions _buildBaseOptions(String baseUrl) {
-  const Duration timeout = Duration(seconds: 15000);
+  const Duration timeout = Duration(milliseconds: 15000);
   return BaseOptions(
     baseUrl: baseUrl,
     connectTimeout: timeout,
