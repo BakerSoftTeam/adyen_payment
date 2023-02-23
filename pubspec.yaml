@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
-  dio: ^4.0.6
+  dio: ^5.0.0
   json_annotation: ^4.7.0
   uuid: ^3.0.6
 

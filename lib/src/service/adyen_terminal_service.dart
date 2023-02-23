@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:adyen_payment/src/factory/request_factory.dart';
 import 'package:adyen_payment/src/model/config.dart';
 import 'package:adyen_payment/src/model/payment/poi_data.dart';
@@ -54,7 +56,7 @@ class AdyenTerminalService {
   Future<ReferencedRefundResponse> refundByReference({
     required POIData transaction,
     ReversalReason reason = ReversalReason.merchantCancel,
-}) async {
+  }) async {
     final request = requestFactory.createReferencedRefundRequest(
       transaction: transaction,
       reason: reason,
@@ -82,9 +84,10 @@ BaseOptions _buildBaseOptions(String baseUrl) {
   const Duration timeout = Duration(seconds: 150);
   return BaseOptions(
     baseUrl: baseUrl,
-    connectTimeout: timeout.inMilliseconds,
-    sendTimeout: timeout.inMilliseconds,
-    receiveTimeout: timeout.inMilliseconds,
+    connectTimeout: timeout,
+    sendTimeout: timeout,
+    receiveTimeout: timeout,
+    contentType: ContentType.json.toString(),
   );
 }
 
