@@ -30,6 +30,7 @@ class RequestFactory {
   MakePayment createPaymentRequest({
     required double amount,
     String? currency,
+    String? transactionId,
     required PointOfSaleConfig config,
   }) {
     return MakePayment(
@@ -38,6 +39,7 @@ class RequestFactory {
         paymentRequest: _createPayment(
           amount: amount,
           currency: currency ?? config.defaultCurrency,
+          transactionId: transactionId,
         ),
       ),
     );
@@ -71,11 +73,12 @@ class RequestFactory {
   PaymentRequest _createPayment({
     required double amount,
     required String currency,
+    String? transactionId,
   }) {
     return PaymentRequest(
       saleData: SaleData(
         saleTransactionId: SaleTransactionId(
-          transactionId: idFactory.generateUuid(),
+          transactionId: transactionId ?? idFactory.generateUuid(),
         ),
       ),
       paymentTransaction: PaymentTransaction(

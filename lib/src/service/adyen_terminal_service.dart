@@ -24,10 +24,12 @@ class AdyenTerminalService {
   /// Ask terminal to take a payment
   Future<MakePaymentResponse> requestPayment({
     required double amount,
+    String? transactionId,
   }) async {
     final request = requestFactory.createPaymentRequest(
       amount: amount,
       config: config,
+      transactionId: transactionId,
     );
 
     final result = await _dio.post(
