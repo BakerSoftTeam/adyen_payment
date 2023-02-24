@@ -40,6 +40,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   var _text = '';
   MakePaymentResponse? _resp;
+  String? _serviceId;
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +60,11 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           const SizedBox(height: 24),
           FloatingActionButton(
+            onPressed: _cancel,
+            child: const Text('c'),
+          ),
+          const SizedBox(height: 24),
+          FloatingActionButton(
             onPressed: _status,
             child: const Text('s'),
           ),
@@ -73,15 +79,39 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _pay() async {
-    var data = await _service.requestPayment(amount: 0.1);
+    final response = _service.requestPayment(amount: 0.1);
+
+    setState(() {
+      _serviceId = response.serviceId;
+    });
+
+    var data = await response.future;
     setState(() {
       _resp = data;
       _text = data.payment.isSuccessful.toString();
     });
   }
 
+  Future<void> _cancel() async {
+    if (_serviceId == null) {
+      return;
+    }
+
+    try {
+      await _service.abortPaymentRequest(serviceId: _serviceId!).future;
+      setState(() {
+        _text = "Success cancel";
+      });
+    } catch (e) {
+      setState(() {
+        _text = "Cancel failed $e";
+      });
+    }
+
+  }
+
   Future<void> _status() async {
-    var data = await _service.requestStatus();
+    var data = await _service.requestStatus().future;
     setState(() {
       final resp = data.responseData.transactionStatusResponse.response;
 
@@ -100,7 +130,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     var data = await _service.refundByReference(
       transaction: _resp!.payment.poiData,
-    );
+    ).future;
 
     setState(() {
       _text = data.reversal.isSuccessful.toString();

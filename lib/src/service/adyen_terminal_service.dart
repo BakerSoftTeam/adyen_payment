@@ -7,6 +7,7 @@ import 'package:adyen_payment/src/model/refund/reversal_reason.dart';
 import 'package:adyen_payment/src/model/response/make_payment_response.dart';
 import 'package:adyen_payment/src/model/response/referenced_refund_payment_response.dart';
 import 'package:adyen_payment/src/model/response/transaction_status_response.dart';
+import 'package:adyen_payment/src/service/terminal_service_response.dart';
 import 'package:dio/dio.dart';
 
 /// Service that allow interact with the Adyen terminal.
@@ -22,53 +23,94 @@ class AdyenTerminalService {
   }) : _dio = dio ?? _createDefaultDio(config);
 
   /// Ask terminal to take a payment
-  Future<MakePaymentResponse> requestPayment({
+  TerminalServiceResponse<MakePaymentResponse> requestPayment({
     required double amount,
-  }) async {
+    String? transactionId,
+  }) {
     final request = requestFactory.createPaymentRequest(
       amount: amount,
       config: config,
+      transactionId: transactionId,
     );
 
-    final result = await _dio.post(
+    final resultFuture = _dio.post(
       '',
       data: request,
     );
 
-    return MakePaymentResponse.fromJson(result.data);
+    return TerminalServiceResponse<MakePaymentResponse>(
+      serviceId: request.requestData.header.serviceId,
+      future: resultFuture.then(
+        (value) => MakePaymentResponse.fromJson(value.data),
+      ),
+    );
+  }
+
+  /// Ask terminal to stop ask payment with [serviceId].
+  /// Has a sense only for not completed payment request.
+  TerminalServiceResponse<void> abortPaymentRequest({
+    required String serviceId,
+  }) {
+    final request = requestFactory.createAbortPaymentRequest(
+      serviceId: serviceId,
+      config: config,
+    );
+
+    final resultFuture = _dio.post(
+      '',
+      data: request,
+      options: Options(
+        responseType: ResponseType.plain,
+      )
+    );
+
+    return TerminalServiceResponse<void>(
+      serviceId: request.requestData.header.serviceId,
+      future: resultFuture,
+    );
   }
 
   /// Ask terminal about status of the last payment request.
-  Future<TransactionStatusResponse> requestStatus() async {
+  TerminalServiceResponse<TransactionStatusResponse> requestStatus() {
     final request = requestFactory.createTransactionStatusRequest(
       config: config,
     );
 
-    final result = await _dio.post(
+    final resultFuture = _dio.post(
       '',
       data: request,
     );
 
-    return TransactionStatusResponse.fromJson(result.data);
+    return TerminalServiceResponse<TransactionStatusResponse>(
+      serviceId: request.requestData.header.serviceId,
+      future: resultFuture.then(
+        (value) => TransactionStatusResponse.fromJson(value.data),
+      ),
+    );
   }
 
-  /// Ask terminal about status of the last payment request.
-  Future<ReferencedRefundResponse> refundByReference({
+  /// Ask terminal about making refund.
+  TerminalServiceResponse<ReferencedRefundResponse> refundByReference({
     required POIData transaction,
     ReversalReason reason = ReversalReason.merchantCancel,
-  }) async {
+  }) {
     final request = requestFactory.createReferencedRefundRequest(
       transaction: transaction,
       reason: reason,
       config: config,
     );
 
-    final result = await _dio.post(
+    final resultFuture = _dio.post(
       '',
       data: request,
     );
 
-    return ReferencedRefundResponse.fromJson(result.data);
+    return TerminalServiceResponse<ReferencedRefundResponse>(
+      serviceId: request.requestData.header.serviceId,
+      future: resultFuture.then(
+        (value) => ReferencedRefundResponse.fromJson(value.data),
+      ),
+    );
   }
 }
 

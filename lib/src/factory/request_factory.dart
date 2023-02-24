@@ -1,6 +1,9 @@
 import 'package:adyen_payment/src/factory/header_factory.dart';
 import 'package:adyen_payment/src/factory/id_factory.dart';
+import 'package:adyen_payment/src/model/abort/abort_request.dart';
+import 'package:adyen_payment/src/model/abort/message_reference.dart';
 import 'package:adyen_payment/src/model/config.dart';
+import 'package:adyen_payment/src/model/header/message_category.dart';
 import 'package:adyen_payment/src/model/payment/amounts_req.dart';
 import 'package:adyen_payment/src/model/payment/payment_request.dart';
 import 'package:adyen_payment/src/model/payment/payment_transaction.dart';
@@ -9,6 +12,8 @@ import 'package:adyen_payment/src/model/payment/sale_data.dart';
 import 'package:adyen_payment/src/model/payment/sale_transaction_id.dart';
 import 'package:adyen_payment/src/model/refund/reversal_reason.dart';
 import 'package:adyen_payment/src/model/refund/reversal_request.dart';
+import 'package:adyen_payment/src/model/request/abort_payment.dart';
+import 'package:adyen_payment/src/model/request/data/abort_sale_to_poi_request.dart';
 import 'package:adyen_payment/src/model/request/data/payment_sale_to_poi_request.dart';
 import 'package:adyen_payment/src/model/request/data/referenced_refund_sale_to_poi_request.dart';
 import 'package:adyen_payment/src/model/request/data/transaction_status_sale_to_poi_request.dart';
@@ -30,6 +35,7 @@ class RequestFactory {
   MakePayment createPaymentRequest({
     required double amount,
     String? currency,
+    String? transactionId,
     required PointOfSaleConfig config,
   }) {
     return MakePayment(
@@ -38,6 +44,28 @@ class RequestFactory {
         paymentRequest: _createPayment(
           amount: amount,
           currency: currency ?? config.defaultCurrency,
+          transactionId: transactionId,
+        ),
+      ),
+    );
+  }
+
+  AbortPayment createAbortPaymentRequest({
+    required String serviceId,
+    String? reason,
+    required PointOfSaleConfig config,
+  }) {
+    return AbortPayment(
+      requestData: AbortSaleToPoiRequest(
+        header: headerFactory.createAbortHeader(config: config),
+        abortRequest: AbortRequest(
+          abortReason: reason ?? 'MerchantAbort',
+          messageReference: MessageReference(
+            messageCategory: MessageCategory.payment,
+            serviceId: serviceId,
+            poiId: config.poiId,
+            saleId: config.saleId,
+          )
         ),
       ),
     );
@@ -62,20 +90,20 @@ class RequestFactory {
   }) {
     return ReferencedRefund(
       requestData: ReferencedRefundSaleToPoiRequest(
-        header: headerFactory.createReversalHeader(config: config),
-        reversalRequest: _createReversal(transaction, reason)
-      ),
+          header: headerFactory.createReversalHeader(config: config),
+          reversalRequest: _createReversal(transaction, reason)),
     );
   }
 
   PaymentRequest _createPayment({
     required double amount,
     required String currency,
+    String? transactionId,
   }) {
     return PaymentRequest(
       saleData: SaleData(
         saleTransactionId: SaleTransactionId(
-          transactionId: idFactory.generateUuid(),
+          transactionId: transactionId ?? idFactory.generateUuid(),
         ),
       ),
       paymentTransaction: PaymentTransaction(
