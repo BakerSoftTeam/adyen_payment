@@ -23,6 +23,18 @@ class HeaderFactory {
     );
   }
 
+  /// Create header part for the abort payment request.
+  MessageHeader createAbortHeader({required PointOfSaleConfig config}) {
+    return MessageHeader(
+      messageClass: MessageClass.service,
+      messageCategory: MessageCategory.abort,
+      messageType: MessageType.request,
+      serviceId: idFactory.generateTimeHash(),
+      saleId: config.saleId,
+      poiId: config.poiId,
+    );
+  }
+
   /// Create header part for the transaction status request.
   MessageHeader createStatusHeader({required PointOfSaleConfig config}) {
     return MessageHeader(
