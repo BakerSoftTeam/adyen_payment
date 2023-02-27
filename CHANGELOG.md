@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.1.1-dev
+### Changed
+* Export new response for external using
+
 ## 0.1.0-dev
 ### Added
 * Way to specify payment id when we ask a payment
