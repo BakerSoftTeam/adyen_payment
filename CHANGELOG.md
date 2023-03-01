@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.1.3-dev
+### Add
+* Export refund reason for external using
+
 ## 0.1.2-dev
 ### Add
 * Interface describes payment system interactions
