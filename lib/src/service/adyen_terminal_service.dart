@@ -11,7 +11,7 @@ import 'package:adyen_payment/src/service/terminal_service_response.dart';
 import 'package:dio/dio.dart';
 
 /// Service that allow interact with the Adyen terminal.
-class AdyenTerminalService {
+class AdyenTerminalService implements IAdyenTerminalService {
   final Dio _dio;
   final PointOfSaleConfig config;
   final RequestFactory requestFactory;
@@ -22,7 +22,7 @@ class AdyenTerminalService {
     Dio? dio,
   }) : _dio = dio ?? _createDefaultDio(config);
 
-  /// Ask terminal to take a payment
+  @override
   TerminalServiceResponse<MakePaymentResponse> requestPayment({
     required double amount,
     String? transactionId,
@@ -46,8 +46,7 @@ class AdyenTerminalService {
     );
   }
 
-  /// Ask terminal to stop ask payment with [serviceId].
-  /// Has a sense only for not completed payment request.
+  @override
   TerminalServiceResponse<void> abortPaymentRequest({
     required String serviceId,
   }) {
@@ -70,7 +69,7 @@ class AdyenTerminalService {
     );
   }
 
-  /// Ask terminal about status of the last payment request.
+  @override
   TerminalServiceResponse<TransactionStatusResponse> requestStatus() {
     final request = requestFactory.createTransactionStatusRequest(
       config: config,
@@ -89,7 +88,7 @@ class AdyenTerminalService {
     );
   }
 
-  /// Ask terminal about making refund.
+  @override
   TerminalServiceResponse<ReferencedRefundResponse> refundByReference({
     required POIData transaction,
     ReversalReason reason = ReversalReason.merchantCancel,
@@ -120,6 +119,30 @@ Dio _createDefaultDio(PointOfSaleConfig config) {
   dio.options = _buildBaseOptions(config.endpoint.url);
   dio.interceptors.add(_ApiKeyInterceptor(config));
   return dio;
+}
+
+/// Interface describes allowed interaction with payment system.
+abstract class IAdyenTerminalService {
+  /// Ask terminal to take a payment
+  TerminalServiceResponse<MakePaymentResponse> requestPayment({
+    required double amount,
+    String? transactionId,
+  });
+
+  /// Ask terminal to stop ask payment with [serviceId].
+  /// Has a sense only for not completed payment request.
+  TerminalServiceResponse<void> abortPaymentRequest({
+    required String serviceId,
+  });
+
+  /// Ask terminal about status of the last payment request.
+  TerminalServiceResponse<TransactionStatusResponse> requestStatus();
+
+  /// Ask terminal about making refund.
+  TerminalServiceResponse<ReferencedRefundResponse> refundByReference({
+    required POIData transaction,
+    ReversalReason reason = ReversalReason.merchantCancel,
+  });
 }
 
 BaseOptions _buildBaseOptions(String baseUrl) {

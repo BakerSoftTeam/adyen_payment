@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.1.2-dev
+### Add
+* Interface describes payment system interactions
+
 ## 0.1.1-dev
 ### Changed
 * Export new response for external using
