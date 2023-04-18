@@ -59,11 +59,13 @@ class AdyenTerminalService implements IAdyenTerminalService {
       config: config,
     );
 
-    final resultFuture = _dio.post('',
-        data: request,
-        options: Options(
-          responseType: ResponseType.plain,
-        ));
+    final resultFuture = _dio.post(
+      '',
+      data: request,
+      options: Options(
+        responseType: ResponseType.plain,
+      ),
+    );
 
     return TerminalServiceResponse<void>(
       serviceId: request.requestData.header.serviceId,
