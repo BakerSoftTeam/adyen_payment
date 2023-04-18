@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.1.4-dev
+### Add
+* Dio client customization is available.
+
 ## 0.1.3-dev
 ### Add
 * Export refund reason for external using
