@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:adyen_payment/src/factory/request_factory.dart';
 import 'package:adyen_payment/src/model/config.dart';
 import 'package:adyen_payment/src/model/payment/poi_data.dart';
@@ -7,6 +5,7 @@ import 'package:adyen_payment/src/model/refund/reversal_reason.dart';
 import 'package:adyen_payment/src/model/response/make_payment_response.dart';
 import 'package:adyen_payment/src/model/response/referenced_refund_payment_response.dart';
 import 'package:adyen_payment/src/model/response/transaction_status_response.dart';
+import 'package:adyen_payment/src/service/http/client.dart';
 import 'package:adyen_payment/src/service/terminal_service_response.dart';
 import 'package:dio/dio.dart';
 
@@ -20,7 +19,12 @@ class AdyenTerminalService implements IAdyenTerminalService {
     required this.config,
     this.requestFactory = const RequestFactory(),
     Dio? dio,
-  }) : _dio = dio ?? _createDefaultDio(config);
+    DioClientSetupDelegate? setupDelegate,
+  }) : _dio = dio ?? createDefaultDioForPaymentSystem(config) {
+    if (setupDelegate != null) {
+      setupDelegate(_dio);
+    }
+  }
 
   @override
   TerminalServiceResponse<MakePaymentResponse> requestPayment({
@@ -55,13 +59,11 @@ class AdyenTerminalService implements IAdyenTerminalService {
       config: config,
     );
 
-    final resultFuture = _dio.post(
-      '',
-      data: request,
-      options: Options(
-        responseType: ResponseType.plain,
-      )
-    );
+    final resultFuture = _dio.post('',
+        data: request,
+        options: Options(
+          responseType: ResponseType.plain,
+        ));
 
     return TerminalServiceResponse<void>(
       serviceId: request.requestData.header.serviceId,
@@ -113,14 +115,6 @@ class AdyenTerminalService implements IAdyenTerminalService {
   }
 }
 
-// Create default dio for service
-Dio _createDefaultDio(PointOfSaleConfig config) {
-  final dio = Dio();
-  dio.options = _buildBaseOptions(config.endpoint.url);
-  dio.interceptors.add(_ApiKeyInterceptor(config));
-  return dio;
-}
-
 /// Interface describes allowed interaction with payment system.
 abstract class IAdyenTerminalService {
   /// Ask terminal to take a payment
@@ -143,39 +137,4 @@ abstract class IAdyenTerminalService {
     required POIData transaction,
     ReversalReason reason = ReversalReason.merchantCancel,
   });
-}
-
-BaseOptions _buildBaseOptions(String baseUrl) {
-  const Duration timeout = Duration(seconds: 150);
-  return BaseOptions(
-    baseUrl: baseUrl,
-    connectTimeout: timeout,
-    sendTimeout: timeout,
-    receiveTimeout: timeout,
-    contentType: ContentType.json.toString(),
-  );
-}
-
-class _ApiKeyInterceptor extends Interceptor {
-  final PointOfSaleConfig _config;
-
-  _ApiKeyInterceptor(this._config);
-
-  @override
-  Future<void> onRequest(
-      RequestOptions options, RequestInterceptorHandler handler) async {
-    try {
-      options.headers.addAll({
-        'x-API-key': _config.apiKey,
-      });
-
-      handler.next(options);
-    } catch (error) {
-      if (error is DioError) {
-        handler.reject(error);
-      } else {
-        handler.reject(DioError(requestOptions: options, error: error));
-      }
-    }
-  }
 }
